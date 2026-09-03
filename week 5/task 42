@@ -1,0 +1,75 @@
+import java.util.*;
+
+class Solution {
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+
+        // Map: column -> list of nodes
+        TreeMap<Integer, List<int[]>> map = new TreeMap<>();
+
+        // Queue for BFS
+        Queue<int[]> queue = new LinkedList<>();
+
+        // Store: node, row, column
+        queue.offer(new int[]{root.val, 0, 0});
+
+        // We need another queue for TreeNode objects
+        Queue<TreeNode> nodes = new LinkedList<>();
+        nodes.offer(root);
+
+        while (!nodes.isEmpty()) {
+
+            TreeNode current = nodes.poll();
+            int[] position = queue.poll();
+
+            int row = position[1];
+            int col = position[2];
+
+            // Add node to its column
+            map.putIfAbsent(col, new ArrayList<>());
+            map.get(col).add(new int[]{row, current.val});
+
+            // Left child
+            if (current.left != null) {
+                nodes.offer(current.left);
+                queue.offer(new int[]{current.left.val, row + 1, col - 1});
+            }
+
+            // Right child
+            if (current.right != null) {
+                nodes.offer(current.right);
+                queue.offer(new int[]{current.right.val, row + 1, col + 1});
+            }
+        }
+
+        List<List<Integer>> result = new ArrayList<>();
+
+        // Process columns from left to right
+        for (List<int[]> list : map.values()) {
+
+            // Sort by row, then by value
+            Collections.sort(list, (a, b) -> {
+                if (a[0] != b[0]) {
+                    return a[0] - b[0];
+                }
+                return a[1] - b[1];
+            });
+
+            List<Integer> column = new ArrayList<>();
+
+            for (int[] node : list) {
+                column.add(node[1]);
+            }
+
+            result.add(column);
+        }
+
+        return result;
+    }
+}
+
+Input
+root =
+[3,9,20,null,null,15,7]
+Output
+[[9],[3,15],[20],[7]]
