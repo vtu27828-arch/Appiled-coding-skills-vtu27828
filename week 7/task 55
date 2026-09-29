@@ -1,0 +1,32 @@
+class Solution {
+    public int findJudge(int n, int[][] trust) {
+
+        int[] trustCount = new int[n + 1];
+
+        for (int[] t : trust) {
+            int a = t[0];
+            int b = t[1];
+
+            // a trusts b
+            trustCount[a]--;
+            trustCount[b]++;
+        }
+
+        // Judge must have net trust count = n - 1
+        for (int i = 1; i <= n; i++) {
+            if (trustCount[i] == n - 1) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+}
+
+Input
+n =
+2
+trust =
+[[1,2]]
+Output
+2
