@@ -1,0 +1,62 @@
+import java.util.*;
+
+class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+
+        // Create adjacency list
+        List<List<Integer>> graph = new ArrayList<>();
+
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
+        }
+
+        // Calculate indegree of each course
+        int[] indegree = new int[numCourses];
+
+        for (int[] prerequisite : prerequisites) {
+            int course = prerequisite[0];
+            int prerequisiteCourse = prerequisite[1];
+
+            graph.get(prerequisiteCourse).add(course);
+            indegree[course]++;
+        }
+
+        // Add courses with no prerequisites
+        Queue<Integer> queue = new LinkedList<>();
+
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int completedCourses = 0;
+
+        // Topological sorting
+        while (!queue.isEmpty()) {
+
+            int course = queue.poll();
+            completedCourses++;
+
+            for (int nextCourse : graph.get(course)) {
+
+                indegree[nextCourse]--;
+
+                if (indegree[nextCourse] == 0) {
+                    queue.offer(nextCourse);
+                }
+            }
+        }
+
+        // If all courses are completed, there is no cycle
+        return completedCourses == numCourses;
+    }
+}
+
+Input
+numCourses =
+2
+prerequisites =
+[[1,0]]
+Output
+true
