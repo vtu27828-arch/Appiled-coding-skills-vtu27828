@@ -1,0 +1,122 @@
+import java.util.*;
+
+class Solution {
+    public int[] sortItems(int n, int m, int[] group, List<List<Integer>> beforeItems) {
+
+        // Assign a unique group to every ungrouped item
+        for (int i = 0; i < n; i++) {
+            if (group[i] == -1) {
+                group[i] = m++;
+            }
+        }
+
+        // Create graphs for items and groups
+        List<List<Integer>> itemGraph = new ArrayList<>();
+        List<List<Integer>> groupGraph = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            itemGraph.add(new ArrayList<>());
+        }
+
+        for (int i = 0; i < m; i++) {
+            groupGraph.add(new ArrayList<>());
+        }
+
+        int[] itemIndegree = new int[n];
+        int[] groupIndegree = new int[m];
+
+        // Build the graphs
+        for (int i = 0; i < n; i++) {
+            for (int prev : beforeItems.get(i)) {
+
+                // Dependency between items
+                itemGraph.get(prev).add(i);
+                itemIndegree[i]++;
+
+                // Dependency between different groups
+                if (group[prev] != group[i]) {
+                    groupGraph.get(group[prev]).add(group[i]);
+                    groupIndegree[group[i]]++;
+                }
+            }
+        }
+
+        // Topologically sort the items
+        List<Integer> sortedItems = topologicalSort(
+            itemGraph, itemIndegree, n
+        );
+
+        // Topologically sort the groups
+        List<Integer> sortedGroups = topologicalSort(
+            groupGraph, groupIndegree, m
+        );
+
+        // If either graph contains a cycle, return an empty array
+        if (sortedItems.size() != n || sortedGroups.size() != m) {
+            return new int[0];
+        }
+
+        // Group the sorted items
+        Map<Integer, List<Integer>> groupedItems = new HashMap<>();
+
+        for (int item : sortedItems) {
+            groupedItems
+                .computeIfAbsent(group[item], k -> new ArrayList<>())
+                .add(item);
+        }
+
+        // Construct the final answer following group order
+        int[] result = new int[n];
+        int index = 0;
+
+        for (int g : sortedGroups) {
+            for (int item : groupedItems.getOrDefault(g, new ArrayList<>())) {
+                result[index++] = item;
+            }
+        }
+
+        return result;
+    }
+
+    private List<Integer> topologicalSort(
+        List<List<Integer>> graph,
+        int[] indegree,
+        int size
+    ) {
+        Queue<Integer> queue = new LinkedList<>();
+        List<Integer> order = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+            order.add(current);
+
+            for (int next : graph.get(current)) {
+                indegree[next]--;
+
+                if (indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+
+        return order;
+    }
+}
+
+Input
+n =
+8
+m =
+2
+group =
+[-1,-1,1,0,0,1,0,-1]
+beforeItems =
+[[],[6],[5],[6],[3,6],[],[],[]]
+Output
+[6,3,4,5,2,0,7,1]
