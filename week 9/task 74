@@ -1,0 +1,32 @@
+import java.util.*;
+
+class Solution {
+    public List<Integer> countSmaller(int[] nums) {
+        int n = nums.length;
+        int[] bit = new int[20002];
+        Integer[] counts = new Integer[n];
+
+        for (int i = n - 1; i >= 0; i--) {
+            int index = nums[i] + 10001;
+            int count = 0;
+
+            for (int j = index - 1; j > 0; j -= j & -j) {
+                count += bit[j];
+            }
+
+            counts[i] = count;
+
+            for (int j = index; j < bit.length; j += j & -j) {
+                bit[j]++;
+            }
+        }
+
+        return Arrays.asList(counts);
+    }
+}
+
+Input
+nums =
+[5,2,6,1]
+Output
+[2,1,1,0]
